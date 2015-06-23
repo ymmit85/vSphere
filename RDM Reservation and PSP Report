@@ -19,7 +19,7 @@
 #>
 
 #Configurable paramters 
-$cluster = "SAP_DC1"
+$cluster = "CLUSTER NAME"
 $filepath = "c:\temp\"
 $filedate = get-date -UFormat %d%m%Y
 $filename = "RDM Report $cluster $filedate"
