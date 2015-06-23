@@ -7,6 +7,8 @@
         
 .USAGE
     Manual - Ad-hoc
+	
+	RDM_Reservation_and_PSP_Report.ps1 -cluster <CLUSTER NAME>
 
 	Change the $cluster value to the cvCentre cluster you wish to report on. "*" will scan all clusters.
 
@@ -15,11 +17,17 @@
 
 .CHANGELOG
     Version 1.0   : 11/05/2015 Initial Build
-
+    Version 1.1   : 23/06/2015 Added required parameter to specify cluster when running script eg: script.ps1 -Cluster "Cluster Name"
 #>
 
+Param(
+	[CmdletBinding()]
+	[Parameter(Mandatory=$True)]
+	[string]$cluster
+	)
+
 #Configurable paramters 
-$cluster = "CLUSTER NAME"
+
 $filepath = "c:\temp\"
 $filedate = get-date -UFormat %d%m%Y
 $filename = "RDM Report $cluster $filedate"
