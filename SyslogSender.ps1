@@ -2,7 +2,10 @@ Function SyslogSender ()
 {
        <#
               .SYNOPSIS
-                     UDP client creation to send message to a syslog server
+                     UDP client creation to send message to a syslog server.
+					 This script was sourced from https://www.sgc-univ.net/powershell-udp-client-and-syslog-messages/.
+					 
+					 
               .DESCRIPTION
                      Basic usage:
                            $Obj = ./SyslogSender 192.168.2.4
