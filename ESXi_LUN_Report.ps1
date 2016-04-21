@@ -8,9 +8,18 @@
 
 #>
 
+Param
+(
+	[CmdletBinding()]
+	[Parameter(Mandatory=$false)]
+	[string]$path
+)
 
-#Output directory for report
-$output = "$pwd\Lun_Report_$(get-date -f yyyy-MM-dd).csv"
+if ($path) {
+    $output = $path
+    } else { 
+    $output = $PWD
+    }
 
 $lunpathinfo = @()
 
@@ -35,4 +44,4 @@ $hostview.config.storagedevice.multipathinfo.lun | % { `
 }
 
 #Output Report
-$lunpathinfo | export-csv $output
+$lunpathinfo | export-csv "$output\Lun_Report_$(get-date -f yyyy-MM-dd).csv"

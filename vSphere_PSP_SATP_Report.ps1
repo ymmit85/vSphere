@@ -1,4 +1,17 @@
-﻿$lunpathinfo = @()
+﻿Param
+(
+	[CmdletBinding()]
+	[Parameter(Mandatory=$false)]
+	[string]$path
+)
+
+if ($path) {
+    $output = $path
+    } else { 
+    $output = $PWD
+    }
+
+$lunpathinfo = @()
 foreach ($vmhost in get-vmhost) {
  
 #foreach ($vmhost in get-cluster "SAP_DEV_TEST" | get-vmhost) {
@@ -17,4 +30,4 @@ $hostview.config.storagedevice.multipathinfo.lun | % { `
     }
 }
 }
-$lunpathinfo | export-csv c:\scripts\host_luns.csv
+$lunpathinfo | export-csv "$output\host_luns.csv"
