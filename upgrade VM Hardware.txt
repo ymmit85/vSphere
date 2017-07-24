@@ -1,0 +1,14 @@
+$vm = "aaa"
+
+shutdown-vmguest -vm $vm -confirm:$false
+
+Do {$vmStatus = get-vm -name $vm;  write-Host "Waiting for $vm to Shutdown... $(get-date -f HH:mm:ss)" -ForegroundColor Yellow; sleep -s 10}
+            until ($vmStatus.PowerState -eq "PoweredOff")
+
+write-host "yay! $vm is off now.. upgrading hardware"
+
+get-vm -name $vm | set-vm -version v12 -confirm:$false
+$x = get-vm $vm
+write-host "Hardware on $vm upgraded to $x.version... cranking it back up"
+
+start-vm -name $vm -confirm:$false
