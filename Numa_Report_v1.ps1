@@ -49,7 +49,7 @@ $Clusters = Get-Cluster
             
                     #Display report for current cluster
                     if ($largeMemVM -or $largeCPUVM) {
-                            Write-Host "Numa Node Specs for Cluster - $c." -ForegroundColor Green
+                            Write-Host "NUMA Node Specs for Cluster - $c." -ForegroundColor Green
                             $NUMAStats | ft
                 
                         if ($largeCPUVM) {
