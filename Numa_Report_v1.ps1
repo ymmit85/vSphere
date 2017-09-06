@@ -1,4 +1,14 @@
-﻿#Get list of all clusters in vCentre
+﻿       <#
+              .SYNOPSIS
+                    Generates report detailing ESXi Host NUMA configuration and shows VMs that are exceeding NUMA node size.
+					 
+					 
+              .DESCRIPTION
+                     Basic usage:
+                     Connect to vCenter and execute Numa_Report_v1.ps1
+        #>
+
+#Get list of all clusters in vCentre
 $Clusters = Get-Cluster
 ForEach ($c in $Clusters){  
         For($e = 1; $e -le $Clusters.count; $e++) {
