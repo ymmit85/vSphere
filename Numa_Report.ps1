@@ -10,6 +10,11 @@
 
 #Get list of all clusters in vCentre
 $Clusters = Get-Cluster
+if (!$Clusters) {
+    Write-Host "No Clusters found"
+}
+else {
+}
 ForEach ($c in $Clusters){  
         For($e = 1; $e -le $Clusters.count; $e++) {
             Write-Progress -Activity "Processing Clusters" -status "Working on cluster - $c" ` -percentComplete ($e / $Clusters.count*100)
@@ -72,4 +77,5 @@ ForEach ($c in $Clusters){
                         $largeMemVM | select name, @{N='Memory GB';E={$_.MemoryGB}}, @{N='Num CPU';E={$_.ExtensionData.Config.Hardware.NumCPU}}, @{N='Num Sockets';E={($_.ExtensionData.Config.Hardware.NumCPU / $_.ExtensionData.Config.Hardware.NumCoresPerSocket)}}, @{N='Cores Per Socket';E={$_.ExtensionData.Config.Hardware.NumCoresPerSocket}}, @{N='CPU Hot Plug Status';E={$_.ExtensionData.Config.CpuHotAddEnabled}} | ft
                     }
                 }
+}
 }
