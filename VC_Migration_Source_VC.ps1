@@ -68,6 +68,8 @@ if (!($directory)) {$directory = (Get-Location).Path}
 $directory = $directory.trim("\") #" This comment is to fix the gistit syntax highlighting.
 new-item $directory -type directory -erroraction silentlycontinue
 
+try {Get-Datacenter $datacenter -ErrorAction Stop}
+catch {Write-Output "Datacenter $datacenter not found.."}
 #if ((get-datacenter).count -gt 1){write-error "These scripts do not support multiple Datacenters in a single inventory"}
 
 #Get Roles
