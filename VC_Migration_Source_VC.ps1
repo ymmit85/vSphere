@@ -69,7 +69,7 @@ $directory = $directory.trim("\") #" This comment is to fix the gistit syntax hi
 new-item $directory -type directory -erroraction silentlycontinue
 
 try {Get-Datacenter $datacenter -ErrorAction Stop}
-catch {Write-Output "Datacenter $datacenter not found.."}
+catch {Write-Output "Datacenter $datacenter not found.."; break}
 #if ((get-datacenter).count -gt 1){write-error "These scripts do not support multiple Datacenters in a single inventory"}
 
 #Get Roles
