@@ -60,5 +60,5 @@ param (
         }
     }
     End {
-        Disconnect-CisServer $SourceAppliance -Confirm:$false
+        Disconnect-CisServer -server $Connection -Confirm:$false
     }
