@@ -7,7 +7,6 @@
 .NOTES
     Version: 1.0
     Author: Tim Williams
-    MD5: 0E7BD700F05552B0B69E60EB9E7E64A7
 
 .PARAMETER InputFile
     Txt file with a list of folders to list VMs from.
@@ -15,9 +14,14 @@
     Single Folder that VMs will be listed from.
 .PARAMETER OutputPath
     Directory to output txt files to. Script will validate path exists.
-
+.PARAMETER vCenter
+    vCenter server to connect to. Can be set within script if required.
+.PARAMETER username
+    Username of account with sufficient access. Can be set within script if required.
+.PARAMETER password
+    Password for access.  Can be set within script if required.
 .EXAMPLE
-    .\VMs in Folder.ps1 -SourceFolder "My VMs" -OutputPath c:\temp
+    .\VMs in Folder.ps1 -SourceFolder "My VMs" -OutputPath c:\temp -vCenter vcenter.com -Username user123 -Password Password1
 .EXAMPLE
     .\VMs in Folder.ps1 -InputFile c:\temp\input.txt -OutputPath c:\temp
 #>
@@ -27,23 +31,29 @@ param (
     $InputFile,
     [Parameter(Mandatory=$false)]
     $SourceFolder,
+    [Parameter(Mandatory=$false)]
+    $vCenter,
+    [Parameter(Mandatory=$false)]
+    $Username,
+    [Parameter(Mandatory=$false)]
+    $Password,
     [ValidateScript({Test-Path $_ -PathType 'Container'})]
     [Parameter(Mandatory=$true)]
     [String]
     $OutputPath
 )
 
-$vCenter = ""
-$username = ""
-$password = ""
+if (!($vCenter)) {$vCenter = ""}
+if (!($username)) {$username = ""}
+if (!($password)) {$password = ""}
 
-Connect-viserver -Server $vCenter -User $password -Password $password
+Connect-viserver -Server $vCenter -User $username -Password $password
 
 $VMs = @()
 $date = $((Get-Date).ToString('yyyy-MM-dd-hh-mm'))
 
 #If OutputPath is not provided then the below path will be used.
-if (!($OutputPath)) {$OutputPath = "C:\temp"}
+if (!($OutputPath)) {$OutputPath = "/tmp"}
 if ($InputFile -and !($SourceFolder)) {
     $input = Get-Content $InputFile
 } elseif ($SourceFolder -and !($InputFile)) {
@@ -65,3 +75,6 @@ foreach ($i in $input) {
 #Output full list of VMs from specified folders
 $gfilename = "$OutputPath\$date All VMs.txt"
 Out-File -InputObject $VMs.name -FilePath $gfilename
+
+#Disconect from vCenter
+Disconnect-VIServer -Server $vCenter -confirm:$false -Force | Out-Null
