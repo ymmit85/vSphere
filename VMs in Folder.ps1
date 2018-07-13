@@ -33,6 +33,12 @@ param (
     $OutputPath
 )
 
+$vCenter = ""
+$username = ""
+$password = ""
+
+Connect-viserver -Server $vCenter -User $password -Password $password
+
 $VMs = @()
 $date = $((Get-Date).ToString('yyyy-MM-dd-hh-mm'))
 
