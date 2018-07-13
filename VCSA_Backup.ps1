@@ -1,6 +1,6 @@
 param (
         $SourceAppliance,
-        $Creds,
+        [System.Management.Automation.PSCredential]$Creds,
         [Parameter(ParameterSetName='FullBackup')]
         [switch]$FullBackup,
         [Parameter(ParameterSetName='CommonBackup')]
@@ -46,6 +46,23 @@ Foreach ($Source in $SourceAppliance) {
         if ($FullBackup) {$parts = @("common","seat")}
         if ($CommonBackup) {$parts = @("common")}
     }
+
+    #show size of backups
+    $recoveryAPI = Get-CisService 'com.vmware.appliance.recovery.backup.parts'
+    $backupParts = $recoveryAPI.list() | select id
+
+    $estimateBackupSize = 0
+    $backupPartSizes = ""
+    foreach ($backupPart in $backupParts) {
+        $partId = $backupPart.id.value
+        $partSize = $recoveryAPI.get($partId)
+        $estimateBackupSize += $partSize
+        $backupPartSizes += $partId + " data is " + $partSize + " MB`n"
+    }
+
+    Write-Host "Estimated Backup Size: $estimateBackupSize MB"
+    Write-Host $backupPartSizes
+
 
     #main backup section
     $date = $((Get-Date).ToString('yyyy-MM-dd-hh-mm'))
