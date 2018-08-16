@@ -11,11 +11,35 @@ param (
         $LocationUser,
         [VMware.VimAutomation.Cis.Core.Types.V1.Secret]$LocationPassword,
         [VMware.VimAutomation.Cis.Core.Types.V1.Secret]$BackupPassword,
-        $Comment = "Backup job"
+        $Comment = "Backup job",
+        $ConfigPath
     )
+
+if ($ConfigPath) {
+    Write-Output "Using config file..."
+    $config = Get-Content -Path $path\json.json | ConvertFrom-Json
+    $SourceAppliance = $config.SourceAppliance
+    $FullBackup = $config.FullBackup
+    $CommonBackup = $config.CommonBackup
+    $LocationType = $config.LocationType
+    $Location = $config.Location
+    $LocationUser = $config.LocationUser
+    $LocationPassword = $config.LocationPassword
+    $BackupPassword = $config.BackupPassword
+    $Comment = $config.Comment
+    $Username = $config.Username
+    $Password = $config.Password
+}
 
 #Disconenct from any current connected servers
 Disconnect-CisServer * -Force -Confirm:$false | Out-Null
+
+if ($Username -and $Password) {
+        # Convert specified Password to secure string
+        $SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+        $Creds = New-Object System.Management.Automation.PSCredential ($Username, $SecurePassword)
+    
+}
 
 #Manage creds
 if (!($Creds)) {
