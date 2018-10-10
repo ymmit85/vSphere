@@ -1,24 +1,48 @@
 <#
 .SYNOPSIS  
-    
+    Allow backup of a single VCSA appliance using the built in API to specific remote location.
 .DESCRIPTION
-
+    Allows ad-hoc backups to be completed for VCSA (Embedded or External PSC supported). Script will identify type fo appliance being backed up and adjsut backup type if necessary.
+    Settings can be hard coded in script (eg: backup destination and type) so only the source appliance name and password is required when running script.
 .NOTES
-    Version:        
-    Author:         
-    Twitter:        
-    Github:         
-    Credits:        
+    Version:    1.0
+    Author:     Tim Williams
 .LINK
 
-.PARAMETER param1
-    
-.PARAMETER param2
-    Specifies the type of report that will generated.
-    This parameter is mandatory.
+.PARAMETER Debug
+    Set to Y, to allow debug mode, this will write output to log file.
+
+.PARAMETER SourceAppliance
+    Specifiy the source appliance to backup
+
+.PARAMETER  username
+    Username of account with sufficient rights to execute backup job.
+
+.PARAMETER BackupType
+    Specify backup mode:
+        Full: Full backup to be completed.
+        Common: Only core system configuration.
+
+.PARAMETER LocationType
+    Specify the destination type where the backup will be saved (FTP, SCP, HTTP...)
+
+.PARAMETER Location
+    Destination of the backup files to be saved.
+
+.PARAMETER LocationUser
+    Account that will be used to log into the destination to save backup files.
+
+.PARAMETER LocationPassword
+    Password for account that will be used to log into the destination to save backup files.
+
+.PARAMETER BackupPassword
+    Password used to encrypt the backup data.
+
+.PARAMETER Comment
+    Comment used on backup job.
 
 .EXAMPLE
-    .\script.ps1 -param1 -param2
+    .\VCSA_Backup.ps1 -SourceAppliance vCenter@domain.com -username "administrator@vsphere.local" -Debug Y
     
 #>
 
@@ -35,7 +59,7 @@ param (
         $Comment = "Scheduled Backup Task"
     )
 
-    if (!($SourceAppliance)){$SourceAppliance = "vc652.minilab.local"}
+    if (!($SourceAppliance)){$SourceAppliance = "vc652.lab.local"}
     if (!($username)){$username = "administrator@vsphere.local"}
     if (!($BackupType)){$BackupType = "Full"}
     if (!($LocationType)){$LocationType = "FTP"}
@@ -51,7 +75,6 @@ function Write-Log {
         [Parameter(Mandatory=$true)]
         [string]
         $Message,
-        #[ValidateScript({Test-Path $_})]
         [string]
         [AllowNull()]
         $LogOutputPath  = (Get-Location).Path,
@@ -112,7 +135,6 @@ if ($global:DefaultCisServers -ne $null) {Disconnect-CisServer -Server * -Force 
         $estimateBackupSize += $partSize
         $backupPartSizes += $partId + " data is " + $partSize + " MB`n"
         if ($Debug) {$msg = $backupPartSizes +" "+ $partId + " data is " + $partSize + " MB`n"; Write-Log -Message $msg}
-
     }
 
     Write-Host "Estimated Backup Size: $estimateBackupSize MB"

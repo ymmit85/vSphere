@@ -1,24 +1,30 @@
 <#
 .SYNOPSIS  
+    Allow backup of multiple VCSA appliances using the built in API to specific remote location.
     
 .DESCRIPTION
+    Allows scheduled backups to be completed for VCSA (Embedded or External PSC supported). Script will identify type fo appliance being backed up and adjsut backup type if necessary.
+    Backup configuration is stored in external CSV file using passwords that are encrypted (NOTE: The account that is used to encrypt the password is to be used to run the script).
 
-.NOTES
-    Version:        
-    Author:         
-    Twitter:        
-    Github:         
-    Credits:        
+    Backup configuration is stored in CSV file with following heading layout.
+    Hostname,BackupType,LocationType,Location,LocationUser,LocationPassword,BackupPassword,Comment,VCSAUser,VCSAPassword
+
+    Passwords are encrypted using Encrypt_Text.ps1
+
+    .NOTES
+    Version:    1.0
+    Author:     Tim Williams
+
 .LINK
 
-.PARAMETER param1
-    
-.PARAMETER param2
-    Specifies the type of report that will generated.
-    This parameter is mandatory.
+.PARAMETER Debug
+    Set to Y, to allow debug mode, this will write output to log file.
+
+.PARAMETER ConfigPath
+    Specify the path to the configuration CSV file.
 
 .EXAMPLE
-    .\script.ps1 -param1 -param2
+    .\VCSA_Backup_Bulk.ps1 -ConfigPath c:\temp\config.ps1 -Debug Y
     
 #>
 
