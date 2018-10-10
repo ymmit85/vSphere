@@ -8,6 +8,10 @@ Desktop.ini
 # text files
 *.txt
 
+#Filetypes
+*.pass
+temp_*.*
+
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
@@ -16,8 +20,7 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
-*.csv
-*.pass
+
 # Windows shortcuts
 *.lnk
 
