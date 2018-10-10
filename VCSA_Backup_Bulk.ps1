@@ -23,29 +23,10 @@
 #>
 
 param (
-        $Debug,
-        $SourceAppliance,
-        $username,
-        [ValidateSet("FTP","FTPS","HTTP","HTTPS","SCP")][string]$LocationType,
-        [ValidateSet("Full","Common")][string]$BackupType,
-        $Location,
-        $LocationUser,
-        [VMware.VimAutomation.Cis.Core.Types.V1.Secret]$LocationPassword,
-        [VMware.VimAutomation.Cis.Core.Types.V1.Secret]$BackupPassword,
-        $Comment = "Scheduled Backup Task"
+        $ConfigPath,
+        $Debug
     )
 
-    if (!($SourceAppliance)){$SourceAppliance = "vc652.minilab.local"}
-    if (!($username)){$username = "administrator@vsphere.local"}
-    if (!($BackupType)){$BackupType = "Full"}
-    if (!($LocationType)){$LocationType = "FTP"}
-    if (!($Location)){$Location = "192.168.15.156"}
-    if (!($LocationUser)){$LocationUser = "vmware"}
-    if (!($LocationPassword)){[VMware.VimAutomation.Cis.Core.Types.V1.Secret]$LocationPassword = "vmware"}
-    if (!($BackupPassword)){[VMware.VimAutomation.Cis.Core.Types.V1.Secret]$BackupPassword = ""}
-    if (!($Comment)){$Comment = "Scheduled Backup Task"}
-
-    $password = Read-Host -AsSecureString -Prompt "Enter password for $sourceAppliance"
 function Write-Log {
     Param(
         [Parameter(Mandatory=$true)]
@@ -61,19 +42,25 @@ function Write-Log {
     "[$(TS)]$Message" | Tee-Object -FilePath (join-path -Path $LogOutputPath -ChildPath $LogFilename) -Append | Write-Verbose
 }
 
+$config = import-csv -Path $configpath
 #Disconenct from any current connected servers
+
 if ($global:DefaultCisServers -ne $null) {Disconnect-CisServer -Server * -Force -Confirm:$false | Out-Null}
 
-    write-host "connecting to "$SourceAppliance
+Foreach ($item in $config) {
+#import password for VCSA
+$spass = ConvertTo-SecureString(Get-Content $item.VCSAPassword)
+
+    write-host "connecting to "$item.hostname
     try {
-        $CisServer = Connect-CisServer -Server $SourceAppliance -User $username -Password $password -ErrorAction Stop
+        $CisServer = Connect-CisServer -Server $item.Hostname -User $item.VCSAUser -Password $spass -ErrorAction Stop
     }
     catch {
         $_.Exception.Message
         if ($Debug) {Write-Log -Message $_.Exception.Message}
         continue
     }
-    if ($Debug) {$msg = "connected to $SourceAppliance"; Write-Log -Message $msg}
+    if ($Debug) {$msg = "connected to $CisServer.name"; Write-Log -Message $msg}
 
     #Determnine deployment type
     $vami = @()
@@ -95,10 +82,11 @@ if ($global:DefaultCisServers -ne $null) {Disconnect-CisServer -Server * -Force 
         $parts = @("common")}
 
     elseif ($vcsaType -eq "VCE" -or "VC") {
-        if ($BackupType -eq "Common") {$parts = @("common")}
+        if ($item.BackupType -eq "Common") {$parts = @("common")}
         else {$parts = @("common","seat")}
     }
     if ($Debug) {$msg = "Parts = $parts"; Write-Log -Message $msg}
+
 
     #show size of backups
     $recoveryAPI = Get-CisService 'com.vmware.appliance.recovery.backup.parts'
@@ -117,6 +105,8 @@ if ($global:DefaultCisServers -ne $null) {Disconnect-CisServer -Server * -Force 
 
     Write-Host "Estimated Backup Size: $estimateBackupSize MB"
     Write-Host $backupPartSizes
+    [VMware.VimAutomation.Cis.Core.Types.V1.Secret]$BackupPassword = $item.backuppassword
+    [VMware.VimAutomation.Cis.Core.Types.V1.Secret]$locationpassword = $item.locationpassword
 
     #main backup section
     $date = $((Get-Date).ToString('dd-MM-yyyy-HH-mm'))
@@ -124,11 +114,11 @@ if ($global:DefaultCisServers -ne $null) {Disconnect-CisServer -Server * -Force 
     $CreateSpec = $BackupAPI.Help.create.piece.Create()
     $CreateSpec.parts = $parts
     $CreateSpec.backup_password = $BackupPassword
-    $CreateSpec.location_type = $LocationType
-    $CreateSpec.location = $Location +"/"+$SourceAppliance+"/"+$date
-    $CreateSpec.location_user = $LocationUser
-    $CreateSpec.location_password = $LocationPassword
-    $CreateSpec.comment = $comment + " " + $date
+    $CreateSpec.location_type = $item.LocationType
+    $CreateSpec.location = $item.Location +"/"+$item.Hostname+"/"+$date
+    $CreateSpec.location_user = $item.LocationUser
+    $CreateSpec.location_password = $locationpassword
+    $CreateSpec.comment = $item.comment + " " + $date
 
     if ($Debug) {Write-Log -Message $CreateSpec}
 
@@ -148,13 +138,14 @@ if ($global:DefaultCisServers -ne $null) {Disconnect-CisServer -Server * -Force 
             $progress = ($BackupAPI.get("$($BackupJob.ID)").progress)
             if ($Debug) {$msg = $progress; Write-Log -Message $msg}
 
-            Write-Progress -Activity "Backing up $SourceAppliance - vcsaType = $vcsaType - backupType = $parts"  -Status $BackupAPI.get("$($BackupJob.ID)").state -PercentComplete ($BackupAPI.get("$($BackupJob.ID)").progress) -CurrentOperation "$progress% Complete"
+            Write-Progress -Activity "Backing up $source - vcsaType = $vcsaType - backupType = $parts"  -Status $BackupAPI.get("$($BackupJob.ID)").state -PercentComplete ($BackupAPI.get("$($BackupJob.ID)").progress) -CurrentOperation "$progress% Complete"
             start-sleep -seconds 1
         } until ($BackupAPI.get("$($BackupJob.ID)").progress -eq 100 -or $BackupAPI.get("$($BackupJob.ID)").state -ne "INPROGRESS")
 
-        Write-Progress -Activity "Backing up $SourceAppliance" -Completed
-        if ($Debug) {Write-Log -Message "Backing up $SourceAppliance -Completed"}
+        Write-Progress -Activity "Backing up $source" -Completed
+        if ($Debug) {Write-Log -Message "Backing up $source -Completed"}
         $BackupAPI.get("$($BackupJob.ID)") | select ID, Progress, State
     }
 
-    Disconnect-CisServer -server $SourceAppliance -Confirm:$false
+    Disconnect-CisServer -server $item.Hostname -Confirm:$false
+}
