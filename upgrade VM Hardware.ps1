@@ -10,6 +10,6 @@ write-host "yay! $vm is off now.. upgrading hardware"
 
 set-vm -vm (get-vm $vm) -Version $vmVersion -Confirm:$false
 $x = get-vm $vm
-write-host "Hardware on $vm upgraded to "$x.version"... cranking it back up"
+write-host "Hardware on $vm upgraded to "$x.version"... starting it back up"
 
 start-vm -vm $vm -confirm:$false | Out-Null
