@@ -5,6 +5,13 @@ ehthumbs.db
 # Folder config file
 Desktop.ini
 
+# text files
+*.txt
+
+#Filetypes
+*.pass
+temp_*.*
+
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
