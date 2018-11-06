@@ -1,6 +1,6 @@
 $vm = "aaa"
 $vmVersion = "v11"
-Stop-VM -VM $vm -Confirm:$false | Out-Null
+#Stop-VM -VM $vm -Confirm:$false | Out-Null
 #shutdown-vmguest -vm $vm -confirm:$false
 
 Do {$vmStatus = get-vm -name $vm;  write-Host "Waiting for $vm to Shutdown... $(get-date -f HH:mm:ss)" -ForegroundColor Yellow; sleep -s 10}
