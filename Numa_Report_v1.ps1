@@ -39,12 +39,12 @@ ForEach ($c in $Clusters){
             }
 
                 #Find the smallest NUMA Node (CPU & Mem) to use for comparison
-                $x =  $HostSummary.NUMANodeSize | measure -Minimum
-                $y =  $HostSummary.CPUCoresSocket | measure -Minimum
+                $x =  $NUMAStats.NUMANodeSize | measure -Minimum
+                $y =  $NUMAStats.CPUCoresSocket | measure -Minimum
 
                 #Get list of all VMs in cluster that are oversized
                 $VMDeatils = @()
-                $VMDeatils = Get-VM -Location $c | where {$_.NumCpu -gt $v.Minimum -or $_.MemoryGB -gt $y.Minimum}
+                $VMDeatils = Get-VM -Location $c | where {$_.NumCpu -gt $y.Minimum -or $_.MemoryGB -gt $x.Minimum}
 
                 For($i = 1; $i -le $VMDeatils.count; $i++) {
                     Write-Progress -Activity "Processing VMs" ` -percentComplete ($i / $VMDeatils.count*100)
